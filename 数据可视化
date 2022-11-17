@@ -1,0 +1,92 @@
+'''import matplotlib.pyplot as plt
+
+fig = plt.figure(figsize=(6, 6))
+
+ax1 = fig.add_subplot(2,2,1)
+ax2 = fig.add_subplot(2,2,2)
+ax3 = fig.add_subplot(2,2,3)
+ax4 = fig.add_subplot(2,2,4)
+
+plt.show()'''
+
+
+'''import matplotlib.pyplot as plt
+
+plt.rcParams['font.sans-serif']=['SimHei']
+
+x_data = ['2011','2012','2013','2014','2015','2016','2017']
+y_data = [58000,60200,63000,71000,84000,90500,107000]
+
+plt.xlabel('年份', labelpad=50, fontsize='xx-large', fontweight='bold', rotation='vertical', backgroundcolor='red')
+plt.ylabel('销量', labelpad=50)
+
+plt.title(label='xxx 公司 xxx 产品销量')
+
+
+
+plt.plot(x_data, y_data)
+
+plt.show()
+'''
+'''import matplotlib.pyplot as plt
+
+# 处理中文乱码
+plt.rcParams['font.sans-serif']=['SimHei']
+
+x_data = [2011,2012,2013,2014,2015,2016,2017]
+y_data = [58000,60200,63000,71000,84000,90500,107000]
+y_data_1 = [78000,80200,93000,101000,64000,70500,87000]
+
+plt.title(label='xxx 公司 xxx 产品销量')
+# 设置标题
+plt.plot(x_data, y_data, linestyle = '-.', label = '产品销量')
+plt.plot(x_data, y_data_1, label = '用户增长数')
+# 开启网格线
+plt.grid(True)
+# 设置图例
+plt.legend()
+
+plt.show()'''
+
+
+'''import matplotlib.pyplot as plt
+import numpy as np
+
+# 处理中文乱码
+plt.rcParams['font.sans-serif']=['SimHei']
+
+x_data = np.array([2011,2012,2013,2014,2015,2016,2017])
+y_data = np.array([58000,60200,63000,71000,84000,90500,107000])
+y_data_1 = np.array([78000,80200,93000,101000,64000,70500,87000])
+
+plt.title(label='xxx 公司 xxx 产品销量')
+
+plt.bar(x_data, y_data, width=0.5, alpha=0.6, facecolor = 'deeppink', edgecolor = 'darkblue', lw=2, label='产品销量')
+
+plt.legend()
+plt.show()
+'''
+from pyecharts import options as opts
+from pyecharts.charts import Graph
+
+nodes = [
+    {"name": "肖恩", "symbolSize": 10},
+    {"name": "海棠朵朵", "symbolSize": 20},
+    {"name": "长公主", "symbolSize": 30},
+    {"name": "陈萍萍", "symbolSize": 40},
+    {"name": "范闲", "symbolSize": 50},
+    {"name": "林婉儿", "symbolSize": 40},
+    {"name": "庆帝", "symbolSize": 30},
+    {"name": "范若若", "symbolSize": 20},
+    {"name": "司理理", "symbolSize": 10}
+]
+links = []
+for i in nodes:
+    for j in nodes:
+        links.append({"source": i.get("name"), "target": j.get("name")})
+c = (
+    Graph()
+    .add("", nodes, links, repulsion=8000)
+    .set_global_opts(title_opts=opts.TitleOpts(title="庆余年人物关系图"))
+    .render("graph_base.png")
+)
