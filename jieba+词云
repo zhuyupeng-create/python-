@@ -1,0 +1,36 @@
+import numpy as np
+import jieba
+from wordcloud import WordCloud
+from matplotlib import pyplot as plt
+from PIL import Image
+
+# 以只读模式打开txt文档
+f = open('gun2.txt','r',encoding='UTF-8')
+txt = f.read()
+f.close()
+
+
+# 预处理文本和背景图片
+words = jieba.lcut(txt)		# 文本分词
+newtxt = ' '.join(words)	# 将词语连接起来，以空格为连接词
+img = Image.open(r'20190402163328_31815.jpg')# 打开背景图片
+img_array = np.array(img)		# 将图片转换为数组
+# 去除不希望在词云图中显示的词汇
+excludes = ['将军']
+
+# 设置词云图参数
+wordcloud = WordCloud(
+	background_color="white",
+	width = 1080,
+	height = 960,
+	font_path = "C:/Windows/Fonts/SimHei.TTF",
+	max_words = 150,
+	max_font_size = 100,
+	stopwords = excludes,
+	mask = img_array).generate(newtxt)
+
+# 展示词云图并保存
+plt.imshow(wordcloud)
+plt.axis('off')
+plt.show()
+wordcloud.to_file('result.png')
