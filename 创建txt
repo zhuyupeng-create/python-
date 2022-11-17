@@ -1,0 +1,21 @@
+def main():
+    f = open("guru99.txt","w+") #打开/创建一个文件
+    #书写一些数据
+    for i in range(10):
+        f.write("This is line%d\r\n"%(i+1))
+    f.close()
+
+if __name__ =="__main__":
+    main()
+
+def main():
+    f = open("guru99.txt","r")
+    if f.mode == "r": #use the read() function to read sometihing
+        contents =f.read
+        print(contents)
+    f1 = f.readlines()
+    for  x in f1:
+        print(x)
+        
+if __name__== "__main__":
+    main()
