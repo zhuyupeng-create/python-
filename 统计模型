@@ -1,0 +1,31 @@
+import numpy as np
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+import pandas as pd
+from patsy import dmatrices
+import matplotlib as plt
+
+dat = pd.read_excel('D:/machine-learning/hisdata.xlsx')
+#print(dat)
+#results = smf.ols('Lottery ~ Literacy + np.log(Pop1831)', data=dat).fit()
+#print(results.summary())
+
+vars = ['Department', 'Lottery', 'Literacy', 'Wealth', 'Region']
+df = dat[vars]
+df = df.dropna()
+
+print(df[-5: ])
+
+y, X = dmatrices('Lottery ~ Literacy + Wealth + Region', data=df, return_type='dataframe')
+#dmatrices构造矩阵
+mod = sm.OLS(y, X)# Describe model
+res = mod.fit()       # Fit model
+
+print(res.summary())   # Summarize model
+print(res.params)
+print(res.rsquared)
+print(sm.stats.linear_rainbow(res))
+
+plt = sm.graphics.plot_partregress('Lottery', 'Wealth', ['Region', 'Literacy'],
+                                    data=df, obs_labels=False)
+print(plt)
