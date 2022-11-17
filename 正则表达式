@@ -1,0 +1,112 @@
+import re#导入模块
+
+str = 'make progress everyday ! 123456, and good aNd yes and haha AND 123 '#待匹配字符串
+'''正则表达式字符串写法'''
+pat = re.compile(r'\d+')#正则表达式是一个字符串，在表达前添加 r 可以避免简写时对如 / 进行转译。如：
+obj = re.findall('\d+?', str)# 非贪婪
+print(obj)
+obj = re.findall('\d+', str)# 贪婪
+print(obj)
+
+'''编译'''
+pat = re.compile(r'\d+')#re.compile 预编译正则，可多次使用，编译后可直接调用相关函数
+print(pat.findall(str)) #['123456', '123']
+
+'''匹配'''
+obj = re.match('and', str)# re.match 从文本开头匹配,如果一开始就失败，则返回None
+print(obj.group() if obj else 'None') #None
+
+obj = re.fullmatch('.*?(\d+).*', str)#re.fullmatch 全文匹配
+print(obj.groups() if obj else 'None') #('123456',)
+
+'''查找'''
+obj = re.search('and', str)# re.search 从全文匹配,直到找到一处匹配返回
+print(obj.group() if obj else 'None') #and
+
+obj = re.findall('and', str, re.I)# re.findall 查找，返回所有
+print(obj) #['and', 'aNd', 'and', 'AND']
+
+obj = re.finditer('and', str)# re.finditer 查找，返回结果的迭代器
+print(list(map(lambda m: m.group(), obj))) #['and', 'and']
+
+'''替换'''
+obj = re.sub('and', '*and*', str)# re.sub 字符串替换,直接字符串替换
+print(obj)  # make progress everyday ! 123456, *and* good aNd yes *and* haha AND 1
+
+obj = re.sub('and', '*and*', str, 1)# re.sub 字符串替换,直接字符串替换,同时指定替换的次数
+print(obj)  # make progress everyday ! 123456, *and* good aNd yes and haha AND 123
+
+obj = re.sub('and', '*and*', str, flags=re.IGNORECASE)# # re.sub 字符串替换,直接字符串替换,忽略大小写
+print(obj)  # make progress everyday ! 123456, *and* good *and* yes *and* haha *and* 123
+
+# re.sub 字符串替换,函数替换, 替换函数也可使用lambda表达式，lambda m: '--{}--'.format(m.group())
+def repl(m):
+    return '--{}--'.format(m.group())
+obj = re.sub('and', repl, str)
+print(obj)  # make progress everyday ! 123456, --and-- good aNd yes --and-- haha AND 123
+
+obj = re.sub('and', lambda m: '--{}--'.format(m.group()), str)# re.sub 字符串替换,函数替换, 替换函数使用lambda表达式，
+print(obj)  # make progress everyday ! 123456, --and-- good aNd yes --and-- haha AND 123
+
+obj = re.subn('and', '*and*', str, flags=re.I)# re.subn 字符串替换,直接字符串替换,返回替换的字符串及替换的次数
+print(obj)  # ('make progress everyday ! 123456, *and* good *and* yes *and* haha *and* 123 ', 4)
+
+'''切分'''
+obj = re.split('and', str, flags=re.I)# re.split 分割
+print(obj)#['make progress everyday ! 123456, ', ' good ', ' yes ', ' haha ', ' 123 ']
+
+'''分组使用'''         #使用()对指定表达式括起来即可分组
+ #make progress everyday ! 123456, and good aNd yes and haha AND 123# 源字符串
+obj = re.match('\D*(\d+)\D*(\d+)\D*', str)
+print(obj.groups()) #('123456', '123')# 匹配的字符串元组
+print(obj.lastindex) #2     # 匹配字符串的最大位置索引
+print(obj.group(1)) #123456
+print(obj.group(2)) #123
+
+# 引用为实际分组字符串完全一样,也就是引用的是文本，不是正则表达式
+# 分组直接引用，格式：\分组位置 ， 如：\1 ,  \2
+obj = re.match(r'.*(\d).*\1.*', str)
+print(obj.groups()) #('3',)
+
+# make progress everyday ! 123456, and good aNd yes and haha AND 123# 源字符串
+obj = re.match(r'\D*(?P<numOne>\d+)\D*(?P<numTwo>\d+)\D*', str)# 分组命名，格式：(?P<分组名>正则表达式)
+print(obj.groupdict())  # {'numOne': '123456', 'numTwo': '123'}# 返回匹配串的key/val映射类型
+print(obj.group('numOne'))  # 123456# 根据命名获取匹配串映射类型
+
+obj = re.match(r'.*(?P<numOne>and).*(?P=numOne).*', str)# 分组命名引用，格式：(?P=引用的分组名)
+print(obj.groups()) #('and',)
+
+obj = re.match(r'.*(?P<numOne>and).*\1.*', str)# 分组直接引用，格式：\分组位置 ， 如：\1 ,  \2
+print(obj.groups()) #('and',)
+
+'''指定分组不捕获'''
+#在分组()开头添加 :? 表示该分组结果不捕获.
+
+obj = re.findall(r'((and)\s+\w+)', str)# 内部分组捕获了
+print(obj)  # [('and make', 'and'), ('and good', 'and'), ('and haha', 'and')]
+
+obj = re.findall(r'((?:and)\s+\w+)', str)# 内部分组没有捕获
+print(obj)  # ['and make', 'and good', 'and haha']
+
+'''分组特殊规则'''
+obj = re.findall('(?i:and)', str)# 分组忽略大小写
+print(obj) #['and', 'aNd', 'and', 'AND']
+obj = re.findall('(?-i:and)', str, re.I)# 正则表达式整体忽略大小写，但指定分组不忽略大小写
+print(obj) #['and', 'and']
+
+'''断言
+断言可以对匹配的字符串前后进行规定（对匹配的字符串前后再次添加条件限制）'''
+obj = re.findall(r'(?P<numOne>\s*\w+\s*)(?=progress)', str)# 后向肯定断言，格式：(?=正则表达式)
+print(obj) #['make ']
+
+obj = re.findall(r'(?<=progress)(?P<numOne>\s*\w+\s*)', str)# 前向肯定断言，格式：(?<=正则表达式)
+print(obj) #[' everyday ']
+
+obj = re.findall(r'(?P<numOne>\w+\s+)(?!progress)', str)# 后向否定断言，格式：(?!正则表达式)
+print(obj) #['progress ', 'everyday ', 'and ', 'good ', 'aNd ', 'yes ', 'and ', 'haha ', 'AND ', '123 ']
+
+obj = re.findall(r'(?<!progress)(?P<numOne>\s+\w+)', str)# 前向否定断言，格式：(?<!正则表达式)
+print(obj) #[' progress', ' 123456', ' and', ' good', ' aNd', ' yes', ' and', ' haha', ' AND', ' 123']
+
+
+
