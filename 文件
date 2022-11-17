@@ -1,0 +1,55 @@
+import os
+from shutil import copyfile
+
+path = r'D:/tensory'
+os.makedirs(path + './wisdom') #在path这个路径下创建了一个文件夹叫做'tensory文件夹',在tensory中新建wisdom。
+path = r'D:/tensory/wisdom'
+os.chdir(r'D:/tensory/wisdom')#切换路径 打开刚才创建的文件夹
+ with open("CSDN.doc",'w') as fp:#如果有这个文件就打开，如果没有这个文件就创建一个名叫CSDN的txt文件
+    fp.write("这一步是向fp，也就是CSDN.txt文件内写入内容")
+
+#写完以后一定要关闭这个文件，恢复他的权限，否则你打开这个文件会发现并没有写入内容，并且也不能对这个文件进行操作
+#下面是对文件的复制以及重命名
+
+#copyfile('C:\\Users\\VULCAN\\Desktop\\新建文件夹\\New文件夹\\CSDN.txt','C:\\Users\\VULCAN\\Desktop\\新建文件夹\\New文件夹\\NDSC.txt')
+
+#就是将刚才创建的文件复制到同一个目录下，至于复制到那个文件夹，可以自行修改,复制后的名字就叫做NDSC.txt
+#文件的删除
+fp = open("CSDN.doc",'w')
+fp.close()
+if os.path.exists(fp.name):
+    os.remove(fp.name)
+    print(f'{fp.name} deleted.')
+else:
+    print(f'{fp.name} does not exist.')
+
+#w文件的读写
+f = open("D:/tensory/wisdom/CSDN.doc", 'w')
+f.write('firstline\nsecond line\nthird line')
+for i in range(10):
+    f.write("This is line%d\r\n" % (i + 1))
+f.close()
+
+f = open("D:/tensory/wisdom/CSDN.doc", 'r')
+s = f.readlines()
+print(s)
+f.close()
+
+#PG130字母计算-------
+def sum_of_word(word):
+    sum = 0
+    for char in word:
+        sum += ord(char) - 96
+    return  sum
+
+    with open ('CSDN.doc','w') as result:
+         with open('CSD.doc', 'r') as file:
+             for word in file.readlines():
+                if sum_of_word(word.strip()) == 100:
+                    result.write(word)
+import os
+with open("D:/tensory/wisdom/apple.doc", 'w') as f:
+    f.write('firstline\nsecond line\nthird line')
+        for i in range(10):
+            f.write("This is line%d\r\n" % (i + 1))
+
