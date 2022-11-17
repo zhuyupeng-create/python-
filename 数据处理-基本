@@ -1,0 +1,167 @@
+import pandas as pd
+import numpy as np
+
+#导入数据,dtype = 'object'意味统一按照字符串格式来读取数据。
+#datas = pd.ExcelFile(r'D:\tensory\朝阳医院2018年销售数据.xlsx',dtype = 'object' )
+#data  = datas.parse('数据1' ,dtype = 'object')
+#Execel里只有一个sheet时可使用此语句。
+data = pd.read_excel(r'D:\tensory\朝阳医院2018年销售数据.xlsx', dtype = 'object' )
+
+print(f'数据类型:{type(data)}' ) #查看数据类型
+print(f'项目数据类型:\n{data.dtypes}') #查看每个项目类型
+print(f'数据大小：{data.shape}') #产看数据基本大小
+print(f'数据开头：\n{data.head()}')#查看开头数据，验证数据读取准确率
+
+
+#2数据列重命名
+nameChangeDict = {'购药时间':'销售时间'}#数据单元格改名
+data.rename(columns = nameChangeDict,inplace=True)
+print(f'数据开头：\n{data.head()}')
+
+#2.1缺失数据整理
+print(f'缺失项目：\n{data.isnull().any}')
+print(f"已查找缺失值数据：\n{data[data[['销售时间','社保卡号']].isnull().values ==True]}")
+naDF = data[data[['销售时间','社保卡号']].isnull().values ==True].drop_duplicates()#去掉重复数据
+print(f'去重后数据：\n{naDF}')
+print(f'缺失数据行数：{naDF.shape[0]}')
+print(f'数据大小：{data.shape}')
+data = data.dropna(subset=['销售时间','社保卡号'],how = 'any')#删除多余数据
+print(f'删除缺失数据后数据大小：{data.shape}')
+data = data.reset_index(drop = True)#重新命名行号-排序后的列索引值是之前的行号，需要修改成0-N的顺序的索引值
+print(f'重新排序后数据开头：\n{data.head()}')
+
+#数据类型转换,数量、金额项目字符串转换为浮点型
+data['销售数量'] = data['销售数量'].astype('float')
+data['应收金额'] = data['应收金额'].astype('float')
+data['实收金额'] = data['实收金额'].astype('float')
+print('转换后的数据类型：\n',data.dtypes)
+
+#日期转换为日期类型,日期+星期转为日期
+def dataChange(dataSer):
+    dataList = []
+    for i in dataSer:
+        str = i.split(' ')[0]
+        dataList.append(str)
+    dataChangeSer = pd.Series(dataList)
+    return dataChangeSer
+dateChangeSer = dataChange(data['销售时间'])
+print(f'日期项目修改后：\n{dateChangeSer}')
+
+data['销售时间'] = dateChangeSer
+print(f'时间整理后数据开头：\n{data.head()}')
+print(f"新产生缺失值：{data['销售时间'].isnull().any()}")
+print(f'数据类型：\n{data.dtypes}') #查看每个项目类型
+dataSer = pd.to_datetime(data['销售时间'], format = '%Y-%m-%d', errors='coerce')#销售时间转为日期型
+print(f'销售时间：\n{dataSer}')
+print(f'销售时间缺失？{dataSer.isnull().any()}')#查看缺失值
+compareDf = pd.DataFrame(dataSer[dataSer.isnull()],data[dataSer.isnull()]['销售时间'])
+print(f'缺失数据：\n{compareDf}')
+
+#简单的删除
+data['销售时间'] = dataSer
+print(f'数据类型：\n{data.dtypes}')
+print(f'数据大小：{data.shape}')
+data=data.dropna(subset=['销售时间','社保卡号'],how='any')
+print(f'删除缺失值后数据大小：{data.shape}')
+data=data.reset_index(drop=True)
+
+# 5）数据排序
+data = data.sort_values(by='销售时间')#按销售时间排序
+data = data.reset_index(drop = True)#再次更新一下序号
+print(f'时间整理后数据开头：\n{data.head()}')
+print(f'数据大小：{data.shape}')
+
+#6）异常值处理
+print(f'数据基本情况：\n{data.describe()}')#描述函数查看数据基本情况
+querySer=data.loc[:,'销售数量']>0#查询条件
+print('删除前异常值：',data.shape)
+data=data.loc[querySer,:]
+print('删除后异常值：',data.shape)
+
+
+#4构建模型
+#总消费次数计算
+kpDf = data.drop_duplicates(subset=['销售时间','社保卡号'])
+total = kpDf.shape[0]
+print('总消费次数为：',total)
+
+#月份数计算
+startDay = data.loc[0,'销售时间']
+print('开始日期:',startDay)
+endDay = data.loc[data.shape[0]-1,'销售时间']
+print('结束日期:',endDay)
+monthCount = (endDay - startDay).days//30
+print('月份数:',monthCount)
+
+#业务指标1:月均消费次数=总消费次数 / 月份数
+kpi1 = total / monthCount
+print('业务指标1：月均消费次数=',kpi1)
+
+#业务指标2:月均消费金额 = 总消费金额 / 月份数
+totalMoney = data['实收金额'].sum()
+kpi2 = totalMoney / monthCount
+print('业务指标2：月平均消费金额=',kpi2)
+
+#指标3：客单价=总消费金额 / 总消费次数
+kpi3 = kpi2 / kpi1
+print('业务指标3：客单价=',kpi3)
+
+#指标4：消费趋势，画图：折线图
+
+groupDf=data#在进行操作之前，先把数据复制到另一个数据框中，防止对之前清洗后的数据框造成影响
+
+#第1步：重命名行名（index）为销售时间所在列的值
+groupDf.index=groupDf['销售时间']
+print(groupDf.head())
+
+#第2步：分组
+gb=groupDf.groupby(groupDf.index.month)
+#第3步：应用函数，计算每个月的消费总额
+mounthDf=gb.sum()
+print(mounthDf)
+
+#解决图表中中文表示不正的问题
+import matplotlib as mpl
+
+mpl.rcParams['font.sans-serif'] = ['SimHei']
+mpl.rcParams['font.serif'] = ['SimHei']
+
+import seaborn as sns
+
+sns.set_style("darkgrid",{"font.sans-serif":['simhei', 'Arial']})
+
+import matplotlib.pyplot as plt
+
+#绘制销售数量图
+plt.plot(mounthDf['销售数量'],color = 'b')
+plt.title('销售趋势')
+plt.xlabel('2018年月份')
+plt.ylabel('销售数量')
+
+#设置图片大小
+fig = plt.figure(figsize=(10,6))
+#应收金额图
+plt.plot(mounthDf['应收金额'],color = 'r',label = '应收金额')
+#实收金额图
+plt.plot(mounthDf['实收金额'],color = 'b',label = '实收金额')
+#图标位置
+plt.legend(loc='lower left')
+#大标题
+plt.title('应收金额与实收金额')
+#X坐标标签
+plt.xlabel('2018年月份')
+#Y坐标标签
+plt.ylabel('金额')
+plt.show()
+
+
+
+import pandas as pd
+import numpy as np
+
+
+arr = np.arange(12.).reshape((3,4))
+arr[0]
+print(arr)
+print(arr[0])
+print(arr - arr[0])
