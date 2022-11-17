@@ -1,0 +1,38 @@
+from IPython.core.interactiveshell import InteractiveShell
+InteractiveShell.ast_node_interactivity = 'all'
+
+import datetime
+
+class Golem:
+    def __init__(self, name=None):
+        self.name = name
+        self.built_year = datetime.date.today().year
+
+    def say_hi(self):
+        print('Hi!')
+
+g = Golem('Clay')
+print(g.name)
+print(g.built_year)
+print(g.say_hi)
+print(g.say_hi())
+print(type(g))
+print(type(g.name))
+print(type(g.built_year))
+print(type(g.__init__))
+print(type(g.say_hi))
+
+import random
+def in_dream(day=0, dead=False, kicked=False):
+    dead = not random.randrange(0,10)
+    kicked = not  random.randrange(0,10)
+    day += 1
+    print('dead:', dead, 'kicked:',kicked)
+    if dead:
+        print((f'I slept {day} days, and was dead to wake up ...'))
+        return day
+    elif kicked:
+        print(f'I slept {day} days, and was kicked to wake up ...')
+        return day
+    return in_dream(day)
+print('The in_dream() function returns:', in_dream())
